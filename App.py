@@ -12,18 +12,23 @@ import rasterio
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 import numpy as np
 from PIL import Image
-import os  # <--- IMPORTANTE: 'os' se importa aquí arriba
+import os
 from io import BytesIO
 import sqlite3 # <--- IMPORTANTE: 'sqlite3' se importa aquí arriba
 import glob
 import hashlib
+import sqlite3
 
-# --- CONFIGURACIÓN DE BASE DE DATOS ---
-if not os.path.exists("database"):
-    os.makedirs("database")
+# --- CONFIGURACIÓN DE RUTA SEGURA ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FOLDER = os.path.join(BASE_DIR, "database")
+DB_PATH = os.path.join(DB_FOLDER, "agis_database.db")
+
+if not os.path.exists(DB_FOLDER):
+    os.makedirs(DB_FOLDER)
 
 def inicializar_db():
-    conn = sqlite3.connect("database/agis_database.db")
+    conn = sqlite3.connect(DB_PATH) # Usa la ruta absoluta definida arriba
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS usuarios (
@@ -53,7 +58,7 @@ import streamlit_authenticator as stauth
 # --- LÓGICA DE LOGIN ---
 # Esta función busca en tu base de datos si el usuario existe
 def verificar_login(username, password):
-    conn = sqlite3.connect("database/agis_database.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT password FROM usuarios WHERE username = ?", (username,))
     result = cursor.fetchone()
