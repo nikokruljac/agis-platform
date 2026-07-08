@@ -720,43 +720,41 @@ with tab5:
                         st.session_state[f"edit_mode_{row['id']}"] = False
                         st.rerun()
 
-    # --- SUB-TAB 2: CARGA DE DATOS EN LÍNEA ---
+   # --- SUB-TAB 2: CARGA DE DATOS EN LÍNEA ---
     with sub_tab2:
         st.subheader("📂 Carga de Datos Semanales")
         
-        # 1. Obtenemos lista de usuarios de forma segura
-        conn = sqlite3.connect(DB_PATH) # Usa la constante DB_PATH que definimos
-        try:
-            nombres_usuarios = pd.read_sql_query("SELECT username FROM usuarios", conn)['username'].tolist()
-        except:
-            nombres_usuarios = []
+        # 1. Obtenemos lista de usuarios
+        conn = sqlite3.connect(DB_PATH)
+        df_users = pd.read_sql_query("SELECT username FROM usuarios", conn)
+        nombres_usuarios = df_users['username'].tolist()
         conn.close()
         
         user_sel = st.selectbox("Seleccionar Cliente:", nombres_usuarios, key="sel_user_carga")
         chacra_sel = st.text_input("Nombre de la Chacra:", key="in_chacra_carga")
         
-        # 2. Uploader de archivos múltiples
-        # Nota: 'archivos' será una LISTA, NO una función
-        archivos = st.file_uploader(
+        # 2. Uploader de archivos múltiples (nombre de variable único)
+        mis_archivos_subidos = st.file_uploader(
             "Subir Archivos (CSV, TIF, GeoJSON)", 
             type=['csv', 'tif', 'json', 'geojson'], 
             accept_multiple_files=True, 
-            key="uploader_multiple"
+            key="uploader_multiple_v2"
         )
         
         # 3. Botón de procesamiento
-        if st.button("Procesar y Asignar"):
-            if user_sel and chacra_sel and archivos:
+        if st.button("Procesar y Asignar", key="btn_procesar"):
+            if user_sel and chacra_sel and mis_archivos_subidos:
                 ruta_dir = os.path.join("uploads", user_sel, chacra_sel)
                 os.makedirs(ruta_dir, exist_ok=True)
                 
                 # Guardamos cada archivo
-                for file_obj in archivos:
-                    ruta_archivo = os.path.join(ruta_dir, file_obj.name)
+                for f_obj in mis_archivos_subidos:
+                    ruta_archivo = os.path.join(ruta_dir, f_obj.name)
                     with open(ruta_archivo, "wb") as f:
-                        f.write(file_obj.getbuffer())
+                        f.write(f_obj.getbuffer())
                 
-                st.success(f"¡Se han subido {len(archivos)} archivos correctamente!")
-                st.rerun() # Refrescamos para limpiar la pantalla
+                st.success(f"¡Se han subido {len(mis_archivos_subidos)} archivos!")
+                # Forzamos la limpieza del estado para evitar que el uploader guarde memoria
+                st.rerun() 
             else:
-                st.warning("Completa todos los campos y selecciona al menos un archivo.")
+                st.warning("Completa usuario, chacra y selecciona archivos.")
