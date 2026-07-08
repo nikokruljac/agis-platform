@@ -412,14 +412,11 @@ with col_brand:
         st.markdown("<div style='text-align:right; font-weight:bold; color:#2e7d32; font-size:20px; padding-top:15px;'>AGIS</div>", unsafe_allow_html=True)
 
 # --- DEFINICIÓN SEGURA DE TABS ---
-# --- DEFINICIÓN SEGURA ---
 perfil_usuario = st.session_state.get("perfil", "Productor")
 
 if perfil_usuario == "Administrador":
-    # Creamos las 5 pestañas
     t1, t2, t3, t4, t5 = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil", "💻 AGIS Studio"])
 else:
-    # Creamos solo 4
     t1, t2, t3, t4 = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil"])
     t5 = None
 # =====================================================================
@@ -642,116 +639,110 @@ with t4:
 # =====================================================================
 # MÓDULO 5: AGIS STUDIO (CENTRO DE CONTROL ADMINISTRATIVO)
 # =====================================================================
+
 if t5 is not None:
     with t5:
         st.header("💻 AGIS Studio")
-    st.info("Panel exclusivo para administración de usuarios y carga de datos.")
-    
-    sub_tab1, sub_tab2 = st.tabs(["👥 Gestión de Usuarios", "📂 Carga de Datos en Línea"])
-    
-    # --- SUB-TAB 1: GESTIÓN DE USUARIOS ---
-    with sub_tab1:
-        st.subheader("👥 Gestión de Usuarios")
+        st.info("Panel exclusivo para administración de usuarios y carga de datos.")
         
-        # Formulario para registrar nuevo usuario
-        with st.expander("➕ Registrar Nuevo Usuario"):
-            with st.form("form_usuario", clear_on_submit=True):
-                nombre_usuario = st.text_input("Nombre y Apellido")
-                user_login = st.text_input("Nombre de Usuario (Login)")
-                pass_usuario = st.text_input("Contraseña", type="password")
-                email_usuario = st.text_input("Email")
-                telefono_usuario = st.text_input("WhatsApp (+549...)", placeholder="+549...")
-                perfil_usuario = st.selectbox("Perfil", ["Productor", "Técnico", "Administrador"])
-                chacras_asignadas = st.text_area("Chacras asignadas (separadas por coma)")
-                btn_guardar_usuario = st.form_submit_button("Guardar Usuario")
-                
-            if btn_guardar_usuario:
-                if nombre_usuario and user_login and pass_usuario:
-                    try:
-                        hash_pass = hashlib.sha256(pass_usuario.encode()).hexdigest()
-                        conn = sqlite3.connect("database/agis_database.db")
-                        cursor = conn.cursor()
-                        cursor.execute('''
-                            INSERT INTO usuarios (nombre, username, password, email, telefono, perfil, chacras)
-                            VALUES (?, ?, ?, ?, ?, ?, ?)
-                        ''', (nombre_usuario, user_login, hash_pass, email_usuario, telefono_usuario, perfil_usuario, chacras_asignadas))
-                        conn.commit()
-                        conn.close()
-                        st.success(f"Usuario {nombre_usuario} registrado.")
-                        st.rerun()
-                    except sqlite3.IntegrityError:
-                        st.error("Error: El usuario ya existe.")
-                else:
-                    st.error("Campos obligatorios incompletos.")
-
-        st.divider()
-        st.subheader("📋 Usuarios Registrados")
+        # Ahora las sub-tabs están correctamente dentro del 'with t5:'
+        sub_tab1, sub_tab2 = st.tabs(["👥 Gestión de Usuarios", "📂 Carga de Datos en Línea"])
         
-        # Obtener lista actualizada
-        conn = sqlite3.connect("database/agis_database.db")
-        df_usuarios = pd.read_sql_query("SELECT id, nombre, username, perfil FROM usuarios", conn)
-        conn.close()
-
-        # Mostrar tabla interactiva con acciones
-        for index, row in df_usuarios.iterrows():
-            c1, c2, c3 = st.columns([3, 1, 1])
-            c1.write(f"**{row['username']}** ({row['perfil']}) - {row['nombre']}")
+        # --- SUB-TAB 1: GESTIÓN DE USUARIOS ---
+        with sub_tab1:
+            st.subheader("👥 Gestión de Usuarios")
             
-            # Acción: Eliminar
-            if c2.button("🗑️ Eliminar", key=f"del_{row['id']}"):
-                conn = sqlite3.connect("database/agis_database.db")
-                cursor = conn.cursor()
-                cursor.execute("DELETE FROM usuarios WHERE id = ?", (row['id'],))
-                conn.commit()
-                conn.close()
-                st.rerun()
-                
-            # Acción: Editar
-            if c3.button("✏️ Editar", key=f"edit_{row['id']}"):
-                st.session_state[f"edit_mode_{row['id']}"] = True
+            # Formulario para registrar nuevo usuario
+            with st.expander("➕ Registrar Nuevo Usuario"):
+                with st.form("form_usuario", clear_on_submit=True):
+                    nombre_usuario = st.text_input("Nombre y Apellido")
+                    user_login = st.text_input("Nombre de Usuario (Login)")
+                    pass_usuario = st.text_input("Contraseña", type="password")
+                    email_usuario = st.text_input("Email")
+                    telefono_usuario = st.text_input("WhatsApp (+549...)", placeholder="+549...")
+                    perfil_usuario = st.selectbox("Perfil", ["Productor", "Técnico", "Administrador"])
+                    chacras_asignadas = st.text_area("Chacras asignadas (separadas por coma)")
+                    btn_guardar_usuario = st.form_submit_button("Guardar Usuario")
+                    
+                if btn_guardar_usuario:
+                    if nombre_usuario and user_login and pass_usuario:
+                        try:
+                            hash_pass = hashlib.sha256(pass_usuario.encode()).hexdigest()
+                            conn = sqlite3.connect("database/agis_database.db")
+                            cursor = conn.cursor()
+                            cursor.execute('''
+                                INSERT INTO usuarios (nombre, username, password, email, telefono, perfil, chacras)
+                                VALUES (?, ?, ?, ?, ?, ?, ?)
+                            ''', (nombre_usuario, user_login, hash_pass, email_usuario, telefono_usuario, perfil_usuario, chacras_asignadas))
+                            conn.commit()
+                            conn.close()
+                            st.success(f"Usuario {nombre_usuario} registrado.")
+                            st.rerun()
+                        except sqlite3.IntegrityError:
+                            st.error("Error: El usuario ya existe.")
+                    else:
+                        st.error("Campos obligatorios incompletos.")
 
-            # Formulario de edición (solo aparece si se presiona editar)
-            if st.session_state.get(f"edit_mode_{row['id']}", False):
-                with st.form(key=f"form_edit_{row['id']}"):
-                    nuevo_nombre = st.text_input("Nuevo Nombre", value=row['nombre'])
-                    btn_confirmar = st.form_submit_button("Guardar Cambios")
-                    if btn_confirmar:
-                        conn = sqlite3.connect("database/agis_database.db")
-                        cursor = conn.cursor()
-                        cursor.execute("UPDATE usuarios SET nombre = ? WHERE id = ?", (nuevo_nombre, row['id']))
-                        conn.commit()
-                        conn.close()
-                        st.session_state[f"edit_mode_{row['id']}"] = False
-                        st.rerun()
+            st.divider()
+            st.subheader("📋 Usuarios Registrados")
+            
+            conn = sqlite3.connect("database/agis_database.db")
+            df_usuarios = pd.read_sql_query("SELECT id, nombre, username, perfil FROM usuarios", conn)
+            conn.close()
 
-    # --- SUB-TAB 2: CARGA DE DATOS EN LÍNEA ---
-    with sub_tab2:
-        st.subheader("📂 Carga de Datos Semanales")
-        conn = sqlite3.connect("database/agis_database.db")
-        nombres_usuarios = pd.read_sql_query("SELECT username FROM usuarios", conn)['username'].tolist()
-        conn.close()
-        
-        user_sel = st.selectbox("Seleccionar Cliente:", nombres_usuarios, key="sel_user_carga")
-        chacra_sel = st.text_input("Nombre de la Chacra:", key="in_chacra_carga")
-        archivos = st.file_uploader(
-    "Subir Archivos (CSV, TIF, GeoJSON)", 
-    type=['csv', 'tif', 'json', 'geojson'], 
-    accept_multiple_files=True, 
-    key="uploader_archivos"
-)
-        
-        if st.button("Procesar y Asignar"):
-            if user_sel and chacra_sel and archivos:
-                ruta_dir = os.path.join("uploads", user_sel, chacra_sel)
-                os.makedirs(ruta_dir, exist_ok=True)
+            for index, row in df_usuarios.iterrows():
+                c1, c2, c3 = st.columns([3, 1, 1])
+                c1.write(f"**{row['username']}** ({row['perfil']}) - {row['nombre']}")
                 
-                # Iteramos sobre cada archivo subido
-                for archivo in archivos:
-                    ruta_archivo = os.path.join(ruta_dir, archivo.name)
-                    with open(ruta_archivo, "wb") as f:
-                        f.write(archivo.getbuffer())
-                
-                st.success(f"Se han guardado {len(archivos)} archivos correctamente para {user_sel}.")
-                st.balloons()
-            else:
-                st.error("Por favor completa el cliente, chacra y selecciona al menos un archivo.")
+                if c2.button("🗑️ Eliminar", key=f"del_{row['id']}"):
+                    conn = sqlite3.connect("database/agis_database.db")
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM usuarios WHERE id = ?", (row['id'],))
+                    conn.commit()
+                    conn.close()
+                    st.rerun()
+                    
+                if c3.button("✏️ Editar", key=f"edit_{row['id']}"):
+                    st.session_state[f"edit_mode_{row['id']}"] = True
+
+                if st.session_state.get(f"edit_mode_{row['id']}", False):
+                    with st.form(key=f"form_edit_{row['id']}"):
+                        nuevo_nombre = st.text_input("Nuevo Nombre", value=row['nombre'])
+                        btn_confirmar = st.form_submit_button("Guardar Cambios")
+                        if btn_confirmar:
+                            conn = sqlite3.connect("database/agis_database.db")
+                            cursor = conn.cursor()
+                            cursor.execute("UPDATE usuarios SET nombre = ? WHERE id = ?", (nuevo_nombre, row['id']))
+                            conn.commit()
+                            conn.close()
+                            st.session_state[f"edit_mode_{row['id']}"] = False
+                            st.rerun()
+
+        # --- SUB-TAB 2: CARGA DE DATOS EN LÍNEA ---
+        with sub_tab2:
+            st.subheader("📂 Carga de Datos Semanales")
+            conn = sqlite3.connect("database/agis_database.db")
+            nombres_usuarios = pd.read_sql_query("SELECT username FROM usuarios", conn)['username'].tolist()
+            conn.close()
+            
+            user_sel = st.selectbox("Seleccionar Cliente:", nombres_usuarios, key="sel_user_carga")
+            chacra_sel = st.text_input("Nombre de la Chacra:", key="in_chacra_carga")
+            archivos = st.file_uploader(
+                "Subir Archivos (CSV, TIF, GeoJSON)", 
+                type=['csv', 'tif', 'json', 'geojson'], 
+                accept_multiple_files=True, 
+                key="uploader_archivos"
+            )
+            
+            if st.button("Procesar y Asignar"):
+                if user_sel and chacra_sel and archivos:
+                    ruta_dir = os.path.join("uploads", user_sel, chacra_sel)
+                    os.makedirs(ruta_dir, exist_ok=True)
+                    for archivo in archivos:
+                        ruta_archivo = os.path.join(ruta_dir, archivo.name)
+                        with open(ruta_archivo, "wb") as f:
+                            f.write(archivo.getbuffer())
+                    st.success(f"Se han guardado {len(archivos)} archivos correctamente para {user_sel}.")
+                    st.balloons()
+                else:
+                    st.error("Por favor completa el cliente, chacra y selecciona al menos un archivo.")
