@@ -508,15 +508,22 @@ with tab2:
 
             col_izq, col_der = st.columns([1, 1.2])
             with col_izq:
-                st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
-                n_act = float(lote_row.get('ndre_actual', 0))
-                m_act = float(lote_row.get('ndmi_actual', 0))
-                r_act = float(lote_row.get('vv_actual', 0))
-                
-                st.markdown(f"<div class='status-box' style='background:{('#2e7d32' if n_act>=0.5 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDRE: {n_act:.2f}</div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='status-box' style='background:{('#1565c0' if m_act>=0.3 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDMI: {m_act:.2f}</div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='status-box' style='background:{('#f39c12' if r_act>=0.2 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>Radar: {r_act:.2f}</div>", unsafe_allow_html=True)
-                
+    st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
+    
+    # Obtenemos valores
+    n_act = float(lote_row.get('ndre_actual', 0))
+    m_act = float(lote_row.get('ndmi_actual', 0))
+    v_act = float(lote_row.get('VV_actual', 0)) # El valor VV
+    
+    # --- Definimos el diagnóstico en lugar del número ---
+    diag_ndre = "🟢 Vigor Óptimo" if n_act >= 0.5 else "🔴 Vigor Bajo"
+    diag_ndmi = "🔵 Hídrico OK" if m_act >= 0.3 else "🔴 Estrés Hídrico"
+    diag_radar = "🛰️ Estructura Normal" if v_act > -20 else "⚠️ Alerta Estructural"
+    
+    # --- Pintamos las cajas con el texto ---
+    st.markdown(f"<div class='status-box' style='background:{('#2e7d32' if n_act>=0.5 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDRE: {diag_ndre}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='status-box' style='background:{('#1565c0' if m_act>=0.3 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDMI: {diag_ndmi}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='status-box' style='background:{('#f39c12' if v_act > -20 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>Radar: {diag_radar}</div>", unsafe_allow_html=True)
                 # --- INTEGRACIÓN DINÁMICA ---
                 ruta_usuario = os.path.join("uploads", st.session_state['usuario'], chacra_sel)
                 # Buscamos el TIF asociado al lote o chacra (ajusta el nombre del archivo según tus archivos reales)
