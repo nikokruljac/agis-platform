@@ -75,14 +75,20 @@ import streamlit_authenticator as stauth
 def verificar_login(username, password):
     conn = sqlite3.connect("database/agis_database.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT password FROM usuarios WHERE username = ?", (username,))
+    # Cambiamos para traer tanto la contraseña como el perfil
+    cursor.execute("SELECT password, perfil FROM usuarios WHERE username = ?", (username,))
     result = cursor.fetchone()
     conn.close()
+    
     if result:
-        # Comparamos el hash del input con el hash guardado en DB
+        password_db = result[0]
+        perfil_db = result[1] # Guardamos el perfil
         hash_input = hashlib.sha256(password.encode()).hexdigest()
-        return result[0] == hash_input 
-    return False
+        
+        if password_db == hash_input:
+            return True, perfil_db # Devolvemos éxito y el perfil
+            
+    return False, None # Fallo
 
 # Inicializar el estado de sesión si no existe
 if 'logueado' not in st.session_state:
