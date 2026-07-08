@@ -424,8 +424,8 @@ else:
 # =====================================================================
 # MÓDULO 1: VISTA GENERAL DE CHACRA (ADMIN-SAFE)
 # =====================================================================
-with tab1:
-    st.header("Plan de Recorrido Diario Basado en Riesgo")
+with t1:
+    st.header("Vista General")
     
     # 1. Recuperar datos del usuario y definir alcance
     conn = sqlite3.connect("database/agis_database.db")
@@ -474,8 +474,8 @@ with tab1:
 # =====================================================================
 # MÓDULO 2: DIAGNÓSTICO GEOGRÁFICO (INTEGRACIÓN DINÁMICA)
 # =====================================================================
-with tab2:
-    st.header("Inspección Quirúrgica de Índices y Evidencias")
+with t2:
+    st.header("Diagnóstico")
     
     if 'df_metricas_usr' in locals() and not df_metricas_usr.empty:
         lista_chacras = sorted(list(set(df_metricas_usr['id_chacra'].tolist())))
@@ -541,8 +541,8 @@ with tab2:
 # =====================================================================
 # MÓDULO 3: CENTRAL DE REPORTES CORPORATIVOS (FILTRADO Y SEGURO)
 # =====================================================================
-with tab3:
-    st.header("📋 Central de Reportes y Exportación")
+with t3:
+    st.header("Reportes")
     
     # 1. Aplicamos el mismo filtro que en los otros módulos
     # (Usamos df_metricas_usr si ya está definido, o lo recalculamos aquí por seguridad)
@@ -605,8 +605,8 @@ with tab3:
 # =====================================================================
 # MÓDULO 4: MI PERFIL (GESTIÓN DE CUENTA PERSONAL)
 # =====================================================================
-with tab4:
-    st.header("👤 Mi Perfil de Usuario")
+with t4:
+    st.header("Mi Perfil")
     st.write(f"Usuario activo: **{st.session_state['usuario']}**")
     
     st.divider()
@@ -642,8 +642,9 @@ with tab4:
 # MÓDULO 5: AGIS STUDIO (CENTRO DE CONTROL ADMINISTRATIVO)
 # =====================================================================
 
-with tab5:
-    st.header("💻 AGIS Studio: Centro de Control")
+if t5 is not None:
+    with t5:
+        st.header("💻 AGIS Studio")
     st.info("Panel exclusivo para administración de usuarios y carga de datos.")
     
     sub_tab1, sub_tab2 = st.tabs(["👥 Gestión de Usuarios", "📂 Carga de Datos en Línea"])
