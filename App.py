@@ -508,17 +508,11 @@ with tab2:
 
             col_izq, col_der = st.columns([1, 1.2])
             with col_izq:
+    st.markdown("### 🔍 Debug de Columnas")
+    st.write(f"Columnas disponibles en lote_row: {list(lote_row.keys())}") # Esto te dirá el nombre real
+    
     st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
-    
-    # Obtenemos valores
-    n_act = float(lote_row.get('ndre_actual', 0))
-    m_act = float(lote_row.get('ndmi_actual', 0))
-    v_act = float(lote_row.get('VV_actual', 0)) # El valor VV
-    
-    # --- Definimos el diagnóstico en lugar del número ---
-    diag_ndre = "🟢 Vigor Óptimo" if n_act >= 0.5 else "🔴 Vigor Bajo"
-    diag_ndmi = "🔵 Hídrico OK" if m_act >= 0.3 else "🔴 Estrés Hídrico"
-    diag_radar = "🛰️ Estructura Normal" if v_act > -20 else "⚠️ Alerta Estructural"
+    # ... (el resto del código igual)
     
     # --- Pintamos las cajas con el texto ---
     st.markdown(f"<div class='status-box' style='background:{('#2e7d32' if n_act>=0.5 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDRE: {diag_ndre}</div>", unsafe_allow_html=True)
