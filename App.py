@@ -100,15 +100,16 @@ if not st.session_state['logueado']:
     user_input = st.text_input("Usuario")
     pass_input = st.text_input("Contraseña", type="password")
     
+    # Nota el espacio (identación) antes de 'exito, perfil ='
     if st.button("Ingresar"):
-    exito, perfil = verificar_login(user_input, pass_input) # Capturamos los dos valores
-    if exito:
-        st.session_state['logueado'] = True
-        st.session_state['usuario'] = user_input
-        st.session_state['perfil'] = perfil  # <--- ESTO ES LO QUE FALTABA
-        st.rerun()
-    else:
-        st.error("Usuario o contraseña incorrectos")
+        exito, perfil = verificar_login(user_input, pass_input) 
+        if exito:
+            st.session_state['logueado'] = True
+            st.session_state['usuario'] = user_input
+            st.session_state['perfil'] = perfil
+            st.rerun()
+        else:
+            st.error("Usuario o contraseña incorrectos")
 
 # 1. CONFIGURACIÓN DE INTERFAZ Y ESTILOS
 st.set_page_config(layout="wide", page_title="Plataforma AGIS", page_icon="🌱", initial_sidebar_state="collapsed")
