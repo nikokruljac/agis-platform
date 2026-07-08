@@ -643,7 +643,6 @@ with t4:
 # MÓDULO 5: AGIS STUDIO (CENTRO DE CONTROL ADMINISTRATIVO)
 # =====================================================================
 
-if t5 is not None:
     with t5:
         st.header("💻 AGIS Studio")
     st.info("Panel exclusivo para administración de usuarios y carga de datos.")
