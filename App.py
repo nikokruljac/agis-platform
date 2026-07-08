@@ -18,6 +18,12 @@ import sqlite3 # <--- IMPORTANTE: 'sqlite3' se importa aquí arriba
 import glob
 import hashlib
 
+def obtener_ruta_logo():
+    # Buscamos 'logo_agis.png' en la carpeta raíz
+    if os.path.exists("logo_agis.png"):
+        return "logo_agis.png"
+    return None
+
 # --- CONFIGURACIÓN DE BASE DE DATOS ---
 if not os.path.exists("database"):
     os.makedirs("database")
