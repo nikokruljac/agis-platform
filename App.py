@@ -426,6 +426,15 @@ if perfil_usuario == "Administrador":
 else:
     t1, t2, t3, t4 = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil"])
     t5 = None
+
+# Ahora, en cualquier parte de tu App.py:
+perfil_usuario = st.session_state.get('perfil', 'Productor')
+
+if perfil_usuario == "Administrador":
+    t1, t2, t3, t4, t5 = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil", "💻 AGIS Studio"])
+else:
+    t1, t2, t3, t4 = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil"])
+    t5 = None
 # =====================================================================
 # MÓDULO 1: VISTA GENERAL DE CHACRA (ADMIN-SAFE)
 # =====================================================================
