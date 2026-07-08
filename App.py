@@ -399,7 +399,7 @@ def generar_overlay_con_contraste(nombre_tif, tipo_capa, ruta_carpeta):
                 return "temp_view.png", bordes
     except Exception as e:
         return None, None
-# 5. RENDERIZADO DEL ENCABEZADO
+# --- 5. RENDERIZADO DEL ENCABEZADO ---
 col_title, col_brand = st.columns([4.2, 0.8])
 with col_title:
     st.title("Plataforma de Monitoreo Inteligente")
@@ -411,13 +411,25 @@ with col_brand:
     else:
         st.markdown("<div style='text-align:right; font-weight:bold; color:#2e7d32; font-size:20px; padding-top:15px;'>AGIS</div>", unsafe_allow_html=True)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📊 Módulo 1: Vista General", 
-    "🗺️ Módulo 2: Diagnóstico", 
-    "📋 Módulo 3: Reportes",
-    "👤 Módulo 4: Mi Perfil",
-    "💻 Módulo 5: AGIS Studio"
-])
+# --- DEFINICIÓN CONDICIONAL DE TABS ---
+perfil_actual = st.session_state.get("perfil", "Productor")
+
+if perfil_actual == "Administrador":
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "📊 Módulo 1: Vista General", 
+        "🗺️ Módulo 2: Diagnóstico", 
+        "📋 Módulo 3: Reportes",
+        "👤 Módulo 4: Mi Perfil",
+        "💻 Módulo 5: AGIS Studio"
+    ])
+else:
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "📊 Módulo 1: Vista General", 
+        "🗺️ Módulo 2: Diagnóstico", 
+        "📋 Módulo 3: Reportes",
+        "👤 Módulo 4: Mi Perfil"
+    ])
+    tab5 = None # Esto evita que el módulo exista para no administradores
 # =====================================================================
 # MÓDULO 1: VISTA GENERAL DE CHACRA (ADMIN-SAFE)
 # =====================================================================
