@@ -472,7 +472,7 @@ with tab1:
 # MÓDULO 2: DIAGNÓSTICO GEOGRÁFICO (INTEGRACIÓN DINÁMICA)
 # =====================================================================
 with tab2:
-    st.header("Inspección Quirúrgica de Índices y Evidencias")
+    st.header("Inspección de Índices y Evidencias")
     
     if 'df_metricas_usr' in locals() and not df_metricas_usr.empty:
         lista_chacras = sorted(list(set(df_metricas_usr['id_chacra'].tolist())))
@@ -508,16 +508,15 @@ with tab2:
 
             col_izq, col_der = st.columns([1, 1.2])
             with col_izq:
-    st.markdown("### 🔍 Debug de Columnas")
-    st.write(f"Columnas disponibles en lote_row: {list(lote_row.keys())}") # Esto te dirá el nombre real
-    
-    st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
-    # ... (el resto del código igual)
-    
-    # --- Pintamos las cajas con el texto ---
-    st.markdown(f"<div class='status-box' style='background:{('#2e7d32' if n_act>=0.5 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDRE: {diag_ndre}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='status-box' style='background:{('#1565c0' if m_act>=0.3 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDMI: {diag_ndmi}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='status-box' style='background:{('#f39c12' if v_act > -20 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>Radar: {diag_radar}</div>", unsafe_allow_html=True)
+                st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
+                n_act, m_act = float(lote_row.get('ndre_actual', 0)), float(lote_row.get('ndmi_actual', 0))
+                st.markdown(f"<div class='status-box' style='background:{('#2e7d32' if n_act>=0.5 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDRE: {n_act:.2f}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='status-box' style='background:{('#1565c0' if m_act>=0.3 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDMI: {m_act:.2f}</div>", unsafe_allow_html=True)
+
+            with col_der:
+                st.markdown("### 🗺️ Visor de Capas")
+                capa_sel = st.radio("Capa:", ["Alertas", "NDRE", "NDMI", "Color Real (RGB)"], horizontal=True)
+                
                 # --- INTEGRACIÓN DINÁMICA ---
                 ruta_usuario = os.path.join("uploads", st.session_state['usuario'], chacra_sel)
                 # Buscamos el TIF asociado al lote o chacra (ajusta el nombre del archivo según tus archivos reales)
@@ -535,6 +534,7 @@ with tab2:
             st.warning("No hay datos para esta chacra.")
     else:
         st.error("No hay datos cargados.")
+
 
 # =====================================================================
 # MÓDULO 3: CENTRAL DE REPORTES CORPORATIVOS (FILTRADO Y SEGURO)
