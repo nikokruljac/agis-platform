@@ -737,13 +737,16 @@ with tab5:
 )
         
         if st.button("Procesar y Asignar"):
-            if user_sel and chacra_sel and archivo:
-                ruta_dir = os.path.join("uploads", user_sel, chacra_sel)
-                os.makedirs(ruta_dir, exist_ok=True)
-                ruta_archivo = os.path.join(ruta_dir, archivo.name)
-                with open(ruta_archivo, "wb") as f:
-                    f.write(archivo.getbuffer())
-                st.success(f"Archivo {archivo.name} guardado para {user_sel}.")
-                st.balloons()
-            else:
-                st.error("Por favor completa el cliente, chacra y selecciona un archivo.")
+    if user_sel and chacra_sel and archivos:
+        ruta_dir = os.path.join("uploads", user_sel, chacra_sel)
+        os.makedirs(ruta_dir, exist_ok=True)
+        
+        # Iteramos sobre la lista de archivos cargados
+        for archivo in archivos:
+            ruta_archivo = os.path.join(ruta_dir, archivo.name)
+            with open(ruta_archivo, "wb") as f:
+                f.write(archivo.getbuffer())
+        
+        st.success(f"¡Se han subido {len(archivos)} archivos correctamente para {chacra_sel}!")
+    else:
+        st.error("Por favor, selecciona usuario, nombre de chacra y al menos un archivo.")
