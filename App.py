@@ -729,7 +729,7 @@ with tab5:
         
         user_sel = st.selectbox("Seleccionar Cliente:", nombres_usuarios, key="sel_user_carga")
         chacra_sel = st.text_input("Nombre de la Chacra:", key="in_chacra_carga")
-        archivo = st.file_uploader("Subir Archivo (CSV/TIF)", type=['csv', 'tif'], key="uploader_archivo")
+        archivo = st.file_uploader("Subir Archivo (CSV/TIF/geojson)", type=['csv', 'tif', 'geojson'], key="uploader_archivo")
         
         if st.button("Procesar y Asignar"):
             if user_sel and chacra_sel and archivo:
