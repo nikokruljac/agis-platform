@@ -724,36 +724,39 @@ with tab5:
     with sub_tab2:
         st.subheader("📂 Carga de Datos Semanales")
         
-        # Obtenemos usuarios de la DB
-        conn = sqlite3.connect(DB_PATH) # Asegúrate de usar DB_PATH aquí
-        nombres_usuarios = pd.read_sql_query("SELECT username FROM usuarios", conn)['username'].tolist()
+        # 1. Obtenemos lista de usuarios de forma segura
+        conn = sqlite3.connect(DB_PATH) # Usa la constante DB_PATH que definimos
+        try:
+            nombres_usuarios = pd.read_sql_query("SELECT username FROM usuarios", conn)['username'].tolist()
+        except:
+            nombres_usuarios = []
         conn.close()
         
         user_sel = st.selectbox("Seleccionar Cliente:", nombres_usuarios, key="sel_user_carga")
         chacra_sel = st.text_input("Nombre de la Chacra:", key="in_chacra_carga")
         
-        # CONFIGURACIÓN PARA MÚLTIPLES ARCHIVOS
-        lista_archivos = st.file_uploader(
+        # 2. Uploader de archivos múltiples
+        # Nota: 'archivos' será una LISTA, NO una función
+        archivos = st.file_uploader(
             "Subir Archivos (CSV, TIF, GeoJSON)", 
             type=['csv', 'tif', 'json', 'geojson'], 
-            accept_multiple_files=True,  # ESTO ES LO QUE QUERÍAS
+            accept_multiple_files=True, 
             key="uploader_multiple"
         )
         
+        # 3. Botón de procesamiento
         if st.button("Procesar y Asignar"):
-            if user_sel and chacra_sel and lista_archivos:
-                # Directorio dinámico
+            if user_sel and chacra_sel and archivos:
                 ruta_dir = os.path.join("uploads", user_sel, chacra_sel)
                 os.makedirs(ruta_dir, exist_ok=True)
                 
-                # Procesamos cada uno
-                count = 0
-                for archivo in lista_archivos:
-                    ruta_archivo = os.path.join(ruta_dir, archivo.name)
+                # Guardamos cada archivo
+                for file_obj in archivos:
+                    ruta_archivo = os.path.join(ruta_dir, file_obj.name)
                     with open(ruta_archivo, "wb") as f:
-                        f.write(archivo.getbuffer())
-                    count += 1
+                        f.write(file_obj.getbuffer())
                 
-                st.success(f"¡Éxito! Se procesaron {count} archivos en {ruta_dir}")
+                st.success(f"¡Se han subido {len(archivos)} archivos correctamente!")
+                st.rerun() # Refrescamos para limpiar la pantalla
             else:
-                st.warning("Por favor, completa cliente, chacra y selecciona archivos.")
+                st.warning("Completa todos los campos y selecciona al menos un archivo.")
