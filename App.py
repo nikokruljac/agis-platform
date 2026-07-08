@@ -412,15 +412,16 @@ with col_brand:
         st.markdown("<div style='text-align:right; font-weight:bold; color:#2e7d32; font-size:20px; padding-top:15px;'>AGIS</div>", unsafe_allow_html=True)
 
 # --- DEFINICIÓN SEGURA DE TABS ---
+# --- DEFINICIÓN SEGURA ---
 perfil_usuario = st.session_state.get("perfil", "Productor")
 
 if perfil_usuario == "Administrador":
-    tabs = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil", "💻 AGIS Studio"])
-    tab1, tab2, tab3, tab4, tab5 = tabs
+    # Creamos las 5 pestañas
+    t1, t2, t3, t4, t5 = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil", "💻 AGIS Studio"])
 else:
-    tabs = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil"])
-    tab1, tab2, tab3, tab4 = tabs
-    tab5 = None
+    # Creamos solo 4
+    t1, t2, t3, t4 = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil"])
+    t5 = None
 # =====================================================================
 # MÓDULO 1: VISTA GENERAL DE CHACRA (ADMIN-SAFE)
 # =====================================================================
