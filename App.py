@@ -23,7 +23,11 @@ if not os.path.exists("database"):
     os.makedirs("database")
 
 def inicializar_db():
-    conn = sqlite3.connect("database/agis_database.db")
+    # Usamos la ruta absoluta para que siempre encuentre la carpeta database
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, "database", "agis_database.db")
+    
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS usuarios (
@@ -37,6 +41,16 @@ def inicializar_db():
             chacras TEXT
         )
     ''')
+    
+    # Crear administrador por defecto si no existe
+    cursor.execute("SELECT * FROM usuarios WHERE username = 'admin'")
+    if not cursor.fetchone():
+        hash_admin = hashlib.sha256("admin123".encode()).hexdigest()
+        cursor.execute('''
+            INSERT INTO usuarios (nombre, username, password, perfil) 
+            VALUES (?, ?, ?, ?)
+        ''', ("Administrador", "admin", hash_admin, "Administrador"))
+    
     conn.commit()
     conn.close()
 
