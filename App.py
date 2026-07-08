@@ -411,25 +411,16 @@ with col_brand:
     else:
         st.markdown("<div style='text-align:right; font-weight:bold; color:#2e7d32; font-size:20px; padding-top:15px;'>AGIS</div>", unsafe_allow_html=True)
 
-# --- DEFINICIÓN CONDICIONAL DE TABS ---
-perfil_actual = st.session_state.get("perfil", "Productor")
+# --- DEFINICIÓN SEGURA DE TABS ---
+perfil_usuario = st.session_state.get("perfil", "Productor")
 
-if perfil_actual == "Administrador":
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "📊 Módulo 1: Vista General", 
-        "🗺️ Módulo 2: Diagnóstico", 
-        "📋 Módulo 3: Reportes",
-        "👤 Módulo 4: Mi Perfil",
-        "💻 Módulo 5: AGIS Studio"
-    ])
+if perfil_usuario == "Administrador":
+    tabs = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil", "💻 AGIS Studio"])
+    tab1, tab2, tab3, tab4, tab5 = tabs
 else:
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "📊 Módulo 1: Vista General", 
-        "🗺️ Módulo 2: Diagnóstico", 
-        "📋 Módulo 3: Reportes",
-        "👤 Módulo 4: Mi Perfil"
-    ])
-    tab5 = None # Esto evita que el módulo exista para no administradores
+    tabs = st.tabs(["📊 Vista General", "🗺️ Diagnóstico", "📋 Reportes", "👤 Mi Perfil"])
+    tab1, tab2, tab3, tab4 = tabs
+    tab5 = None
 # =====================================================================
 # MÓDULO 1: VISTA GENERAL DE CHACRA (ADMIN-SAFE)
 # =====================================================================
