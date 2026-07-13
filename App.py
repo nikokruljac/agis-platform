@@ -530,6 +530,28 @@ with tab2:
                 st.markdown("### 🗺️ Visor de Capas")
                 capa_sel = st.radio("Capa:", ["Alertas", "NDRE", "NDMI", "Color Real (RGB)"], horizontal=True)
                 
+                # --- DEBUG DE RUTA ---
+                ruta_usuario = os.path.join("uploads", st.session_state.get('usuario', ''), str(chacra_sel))
+                nombre_tif = f"Lote_{lote_sel}.tif"
+                path_completo = os.path.join(ruta_usuario, nombre_tif)
+                
+                st.caption(f"Buscando en: {path_completo}") # ¡Esto te dirá si la ruta es correcta!
+                
+                # Generamos el overlay
+                temp_file, bordes = generar_overlay_con_contraste(nombre_tif, capa_sel, ruta_usuario)
+                
+                # Mapa
+                m = folium.Map(tiles="OpenStreetMap")
+                
+                if temp_file and bordes:
+                    st.success("✅ Archivo cargado correctamente")
+                    ImageOverlay(image=temp_file, bounds=bordes, opacity=0.7).add_to(m)
+                    m.fit_bounds(bordes)
+                else:
+                    st.warning("⚠️ No se pudo procesar el archivo. Verifica que exista y tenga georreferenciación.")
+                
+                st_folium(m, width="100%", height=350)
+                
                 # --- INTEGRACIÓN DINÁMICA ---
                 ruta_usuario = os.path.join("uploads", st.session_state['usuario'], chacra_sel)
                 # Buscamos el TIF asociado al lote o chacra (ajusta el nombre del archivo según tus archivos reales)
