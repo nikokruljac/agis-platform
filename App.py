@@ -509,9 +509,22 @@ with tab2:
             col_izq, col_der = st.columns([1, 1.2])
             with col_izq:
                 st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
-                n_act, m_act = float(lote_row.get('ndre_actual', 0)), float(lote_row.get('ndmi_actual', 0))
-                st.markdown(f"<div class='status-box' style='background:{('#2e7d32' if n_act>=0.5 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDRE: {n_act:.2f}</div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='status-box' style='background:{('#1565c0' if m_act>=0.3 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'>NDMI: {m_act:.2f}</div>", unsafe_allow_html=True)
+                
+                # 1. Obtenemos valores con manejo seguro
+                n_act = float(lote_row.get('ndre_actual', 0))
+                m_act = float(lote_row.get('ndmi_actual', 0))
+                # Buscamos 'VV_actual' (o el nombre exacto de tu columna radar)
+                v_act = float(lote_row.get('VV_actual', 0)) 
+                
+                # 2. Definimos textos de diagnóstico
+                diag_ndre = "🟢 Vigor Óptimo" if n_act >= 0.5 else "🔴 Vigor Bajo"
+                diag_ndmi = "🔵 Hídrico OK" if m_act >= 0.3 else "🔴 Estrés Hídrico"
+                diag_radar = "🛰️ Estructura Normal" if v_act > -20 else "⚠️ Alerta Estructural"
+                
+                # 3. Renderizamos las cajas de estado
+                st.markdown(f"<div class='status-box' style='background:{('#2e7d32' if n_act>=0.5 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'><b>NDRE:</b> {diag_ndre}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='status-box' style='background:{('#1565c0' if m_act>=0.3 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'><b>NDMI:</b> {diag_ndmi}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='status-box' style='background:{('#f39c12' if v_act > -20 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'><b>Radar (VV):</b> {diag_radar}</div>", unsafe_allow_html=True)
 
             with col_der:
                 st.markdown("### 🗺️ Visor de Capas")
