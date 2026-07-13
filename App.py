@@ -564,7 +564,7 @@ with tab2:
                     ImageOverlay(image=temp_file, bounds=bordes, opacity=0.7).add_to(m)
                     m.fit_bounds(bordes)
                 
-                st_folium(m, width="100%", height=350)
+                st_folium(m, width="100%", height=350, key=f"mapa_lote_{lote_sel}")
         else:
             st.warning("No hay datos para esta chacra.")
     else:
