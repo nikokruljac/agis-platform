@@ -496,13 +496,10 @@ with tab2:
         df_chacra_activa = df_metricas_usr[df_metricas_usr['id_chacra'] == chacra_sel]
         
         if not df_chacra_activa.empty:
-            # Gráficos... (aquí va tu código de gráficos existente)
-            
             st.markdown("---")
             lote_sel = st.selectbox("🎯 Bajar a Detalle Quirúrgico de Lote:", sorted(list(set(df_chacra_activa['id_lote_str'].tolist()))), key="sel_lote_m2_final")
             lote_row = df_chacra_activa[df_chacra_activa['id_lote_str'] == str(lote_sel)].iloc[0]
             
-            # --- ESTRUCTURA DE COLUMNAS CORRECTA ---
             col_izq, col_der = st.columns([1, 1.2])
 
             with col_izq:
@@ -533,27 +530,22 @@ with tab2:
                     <b>Recomendación:</b> {recomendacion}
                     </div>
                 """, unsafe_allow_html=True)
-            
-           with col_der:
+
+            with col_der:
                 st.markdown("### 🗺️ Visor de Capas")
                 capa_sel = st.radio("Capa:", ["Alertas", "NDRE", "NDMI", "Color Real (RGB)"], horizontal=True)
                 
-                # 1. Rutas y variables dinámicas
                 ruta_usuario = os.path.join("uploads", st.session_state.get('usuario', ''), str(chacra_sel))
                 fecha_buscada = lote_row.get('fecha_optica', '2026-03-29')
                 
-                # Mapeo de nombres de archivos
                 mapa_tipos = {"Alertas": "ALERTAS", "NDRE": "NDRE", "NDMI": "NDMI", "Color Real (RGB)": "RGB"}
                 prefijo = mapa_tipos.get(capa_sel, "NDRE")
                 
-                # 2. Búsqueda dinámica del TIF
                 archivos_disponibles = os.listdir(ruta_usuario) if os.path.exists(ruta_usuario) else []
                 nombre_tif = next((f for f in archivos_disponibles if f.startswith(prefijo) and fecha_buscada in f), None)
                 
-                # 3. Mapa base
                 m = folium.Map(tiles="OpenStreetMap")
                 
-                # 4. Procesamiento del TIF (Overlay)
                 temp_file, bordes = generar_overlay_con_contraste(nombre_tif, capa_sel, ruta_usuario) if nombre_tif else (None, None)
                 
                 if temp_file and bordes:
@@ -563,7 +555,6 @@ with tab2:
                 else:
                     st.warning("⚠️ Imagen no encontrada para esta fecha/capa.")
 
-                # 5. Carga del GeoJSON
                 path_geojson = os.path.join(ruta_usuario, "LOTES_GEOJSON.geojson")
                 if os.path.exists(path_geojson):
                     with open(path_geojson) as f:
@@ -573,13 +564,10 @@ with tab2:
                             folium.GeoJson(feature, style_function=lambda x: {'color': 'orange', 'weight': 3, 'fillOpacity': 0}).add_to(m)
                 
                 st_folium(m, width="100%", height=350, key=f"mapa_lote_{lote_sel}")
-                
         else:
             st.warning("No hay datos para esta chacra.")
     else:
         st.error("No hay datos cargados.")
-
-
 # =====================================================================
 # MÓDULO 3: CENTRAL DE REPORTES CORPORATIVOS (FILTRADO Y SEGURO)
 # =====================================================================
