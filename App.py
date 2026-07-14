@@ -510,6 +510,7 @@ with tab2:
             col_izq, col_der = st.columns([1, 1.2])
 
             with col_izq:
+                
     st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
     
     # 1. Definir funciones de estado para los semáforos individuales
