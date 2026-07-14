@@ -471,51 +471,12 @@ with tab1:
 # =====================================================================
 # MÓDULO 2: DIAGNÓSTICO GEOGRÁFICO (INTEGRACIÓN DINÁMICA)
 # =====================================================================
-with tab2:
-    st.header("Inspección de Índices y Evidencias")
-    
-    if 'df_metricas_usr' in locals() and not df_metricas_usr.empty:
-        lista_chacras = sorted(list(set(df_metricas_usr['id_chacra'].tolist())))
-        chacra_sel = st.selectbox("🏢 Seleccionar Establecimiento / Chacra:", lista_chacras, key="sel_chacra_m2_final")
-        df_chacra_activa = df_metricas_usr[df_metricas_usr['id_chacra'] == chacra_sel]
-        
-        if not df_chacra_activa.empty:
-            # 2. Gráficos Originales
-            col_c1, col_c2 = st.columns(2)
-            with col_c1:
-                df_melt_ndre = df_chacra_activa[['id_lote_str', 'ndre_actual', 'ndre_historico']].copy()
-                df_melt_ndre.columns = ['Lote', 'Actual', 'Histórico']
-                st.caption("🟢 **Vigor Vegetativo por Lote (NDRE)**")
-                st.bar_chart(df_melt_ndre.set_index('Lote'), color=["#2e7d32", "#a5d6a7"], use_container_width=True, height=220, stack=False)
-            
-            with col_c2:
-                df_melt_ndmi = df_chacra_activa[['id_lote_str', 'ndmi_actual', 'ndmi_historico']].copy()
-                df_melt_ndmi.columns = ['Lote', 'Actual', 'Histórico']
-                st.caption("🔵 **Estado Hídrico por Lote (NDMI)**")
-                st.bar_chart(df_melt_ndmi.set_index('Lote'), color=["#1565c0", "#90caf9"], use_container_width=True, height=220, stack=False)
 
-            st.markdown("---")
-            
-            lista_lotes = sorted(list(set(df_chacra_activa['id_lote_str'].tolist())))
-            lote_sel = st.selectbox("🎯 Bajar a Detalle Quirúrgico de Lote:", lista_lotes, key="sel_lote_m2_final")
-            lote_row = df_chacra_activa[df_chacra_activa['id_lote_str'] == str(lote_sel)].iloc[0]
-            
-            col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-            col_m1.markdown(f"<div class='metric-card'><b>Origen:</b><br>{'☀️ Óptico' if float(lote_row.get('nubosidad', 0)) < 20 else '📡 Radar SAR'}</div>", unsafe_allow_html=True)
-            col_m2.markdown(f"<div class='metric-card'><b>Confianza:</b><br>🛡️ {lote_row.get('confianza', 'ALTA')}</div>", unsafe_allow_html=True)
-            col_m3.markdown(f"<div class='metric-card'><b>Pasada Óptica:</b><br>📅 {lote_row.get('fecha_optica', 'N/A')}</div>", unsafe_allow_html=True)
-            col_m4.markdown(f"<div class='metric-card'><b>Pasada Radar:</b><br>🛰️ {lote_row.get('fecha_radar', 'N/A')}</div>", unsafe_allow_html=True)
-
-            # --- COLOCAR ESTA FUNCIÓN ANTES DE TU CÓDIGO DE STREAMLIT ---
+# 1. Definir la función FUERA del flujo de ejecución, idealmente arriba
 def obtener_diagnostico_y_recomendacion(lote_row):
-    # Extraer valores de las columnas (G, K, Q)
-    cambio_ndre = float(lote_row.get('cambio_ndre', 0)) # Columna G
-    cambio_ndmi = float(lote_row.get('cambio_ndmi', 0)) # Columna K
-    desvio_sar = float(lote_row.get('desvio_sar', 0))   # Columna Q
-    
-    # Lógica de estados según tus reglas
-    # NDRE: < -5 (Baja), -5 a 5 (Estable), > 5 (Mejora)
-    # NDMI: < -5 (Baja/Estrés), -5 a 5 (Normal), > 5 (Mejora)
+    cambio_ndre = float(lote_row.get('cambio_ndre', 0))
+    cambio_ndmi = float(lote_row.get('cambio_ndmi', 0))
+    desvio_sar = float(lote_row.get('desvio_sar', 0))
     
     if cambio_ndre < -5 and cambio_ndmi < -5 and abs(desvio_sar) > 2:
         return "Estrés severo con impacto estructural", "Priorizar inspección en campo"
@@ -528,31 +489,37 @@ def obtener_diagnostico_y_recomendacion(lote_row):
     else:
         return "Cultivo estable", "Continuar monitoreo normal"
 
-# --- TU CÓDIGO DE STREAMLIT ---
-col_izq, col_der = st.columns([1, 1.2])
+with tab2:
+    st.header("Inspección de Índices y Evidencias")
+    
+    if 'df_metricas_usr' in locals() and not df_metricas_usr.empty:
+        # ... (código de selección de chacra igual)
+        chacra_sel = st.selectbox("🏢 Seleccionar Establecimiento / Chacra:", sorted(list(set(df_metricas_usr['id_chacra'].tolist()))), key="sel_chacra_m2_final")
+        df_chacra_activa = df_metricas_usr[df_metricas_usr['id_chacra'] == chacra_sel]
+        
+        if not df_chacra_activa.empty:
+            # ... (código de gráficos igual)
+            
+            st.markdown("---")
+            lote_sel = st.selectbox("🎯 Bajar a Detalle Quirúrgico de Lote:", sorted(list(set(df_chacra_activa['id_lote_str'].tolist()))), key="sel_lote_m2_final")
+            lote_row = df_chacra_activa[df_chacra_activa['id_lote_str'] == str(lote_sel)].iloc[0]
+            
+            # (Metricas arriba igual)
+            
+            # --- AQUÍ EMPIEZA LA CORRECCIÓN DEL LAYOUT ---
+            col_izq, col_der = st.columns([1, 1.2])
 
-with col_izq:
-    st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
-    
-    # Llamamos a la función con los datos de la fila actual
-    diagnostico, recomendacion = obtener_diagnostico_y_recomendacion(lote_row)
-    
-    # Renderizamos el diagnóstico usando la lógica de colores de tus reglas
-    color_fondo = '#c62828' if "estrés" in diagnostico.lower() or "daño" in diagnostico.lower() else '#2e7d32'
-    
-    st.markdown(f"""
-        <div style='background:{color_fondo}; color:white; padding:15px; border-radius:5px;'>
-        <b>Diagnóstico:</b> {diagnostico}<br>
-        <b>Recomendación:</b> {recomendacion}
-        </div>
-    """, unsafe_allow_html=True)
-
-with col_der:
-    # ... (tu código del visor de mapas)
+            with col_izq:
+                st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
+                diagnostico, recomendacion = obtener_diagnostico_y_recomendacion(lote_row)
+                color_fondo = '#c62828' if "estrés" in diagnostico.lower() or "daño" in diagnostico.lower() else '#2e7d32'
+                st.markdown(f"""<div style='background:{color_fondo}; color:white; padding:15px; border-radius:5px;'>
+                            <b>Diagnóstico:</b> {diagnostico}<br><b>Recomendación:</b> {recomendacion}</div>""", unsafe_allow_html=True)
 
             with col_der:
                 st.markdown("### 🗺️ Visor de Capas")
                 capa_sel = st.radio("Capa:", ["Alertas", "NDRE", "NDMI", "Color Real (RGB)"], horizontal=True)
+                # ... (todo tu código del Visor de Capas aquí adentro)
                 
                 # 1. Rutas y variables dinámicas
                 ruta_usuario = os.path.join("uploads", st.session_state.get('usuario', ''), str(chacra_sel))
