@@ -512,7 +512,6 @@ with tab2:
             with col_izq:
                 
     st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
-    
     # 1. Definir funciones de estado para los semáforos individuales
     # (Usamos las reglas de cambio que definiste: < -5, -5 a 5, > 5)
     def color_semaforo(valor):
