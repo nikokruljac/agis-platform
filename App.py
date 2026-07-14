@@ -506,25 +506,49 @@ with tab2:
             col_m3.markdown(f"<div class='metric-card'><b>Pasada Óptica:</b><br>📅 {lote_row.get('fecha_optica', 'N/A')}</div>", unsafe_allow_html=True)
             col_m4.markdown(f"<div class='metric-card'><b>Pasada Radar:</b><br>🛰️ {lote_row.get('fecha_radar', 'N/A')}</div>", unsafe_allow_html=True)
 
-            col_izq, col_der = st.columns([1, 1.2])
-            with col_izq:
-                st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
-                
-                # 1. Obtenemos valores con manejo seguro
-                n_act = float(lote_row.get('ndre_actual', 0))
-                m_act = float(lote_row.get('ndmi_actual', 0))
-                # Buscamos 'VV_actual' (o el nombre exacto de tu columna radar)
-                v_act = float(lote_row.get('VV_actual', 0)) 
-                
-                # 2. Definimos textos de diagnóstico
-                diag_ndre = "🟢 Vigor Óptimo" if n_act >= 0.5 else "🔴 Vigor Bajo"
-                diag_ndmi = "🔵 Hídrico OK" if m_act >= 0.3 else "🔴 Estrés Hídrico"
-                diag_radar = "🛰️ Estructura Normal" if v_act > -20 else "⚠️ Alerta Estructural"
-                
-                # 3. Renderizamos las cajas de estado
-                st.markdown(f"<div class='status-box' style='background:{('#2e7d32' if n_act>=0.5 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'><b>NDRE:</b> {diag_ndre}</div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='status-box' style='background:{('#1565c0' if m_act>=0.3 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'><b>NDMI:</b> {diag_ndmi}</div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='status-box' style='background:{('#f39c12' if v_act > -20 else '#c62828')}; color:white; padding:10px; margin-bottom:5px; border-radius:5px;'><b>Radar (VV):</b> {diag_radar}</div>", unsafe_allow_html=True)
+            # --- COLOCAR ESTA FUNCIÓN ANTES DE TU CÓDIGO DE STREAMLIT ---
+def obtener_diagnostico_y_recomendacion(lote_row):
+    # Extraer valores de las columnas (G, K, Q)
+    cambio_ndre = float(lote_row.get('cambio_ndre', 0)) # Columna G
+    cambio_ndmi = float(lote_row.get('cambio_ndmi', 0)) # Columna K
+    desvio_sar = float(lote_row.get('desvio_sar', 0))   # Columna Q
+    
+    # Lógica de estados según tus reglas
+    # NDRE: < -5 (Baja), -5 a 5 (Estable), > 5 (Mejora)
+    # NDMI: < -5 (Baja/Estrés), -5 a 5 (Normal), > 5 (Mejora)
+    
+    if cambio_ndre < -5 and cambio_ndmi < -5 and abs(desvio_sar) > 2:
+        return "Estrés severo con impacto estructural", "Priorizar inspección en campo"
+    elif cambio_ndre < -5 and cambio_ndmi < -5:
+        return "Posible estrés hídrico", "Revisar disponibilidad hídrica y condiciones del suelo"
+    elif cambio_ndre < -5 and -5 <= cambio_ndmi <= 5:
+        return "Posible limitante nutricional o daño localizado", "Evaluar nutrición y uniformidad del cultivo"
+    elif abs(desvio_sar) > 2:
+        return "Cambio estructural", "Revisar daños físicos, pisoteo o variabilidad del lote"
+    else:
+        return "Cultivo estable", "Continuar monitoreo normal"
+
+# --- TU CÓDIGO DE STREAMLIT ---
+col_izq, col_der = st.columns([1, 1.2])
+
+with col_izq:
+    st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
+    
+    # Llamamos a la función con los datos de la fila actual
+    diagnostico, recomendacion = obtener_diagnostico_y_recomendacion(lote_row)
+    
+    # Renderizamos el diagnóstico usando la lógica de colores de tus reglas
+    color_fondo = '#c62828' if "estrés" in diagnostico.lower() or "daño" in diagnostico.lower() else '#2e7d32'
+    
+    st.markdown(f"""
+        <div style='background:{color_fondo}; color:white; padding:15px; border-radius:5px;'>
+        <b>Diagnóstico:</b> {diagnostico}<br>
+        <b>Recomendación:</b> {recomendacion}
+        </div>
+    """, unsafe_allow_html=True)
+
+with col_der:
+    # ... (tu código del visor de mapas)
 
             with col_der:
                 st.markdown("### 🗺️ Visor de Capas")
