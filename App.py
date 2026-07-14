@@ -511,7 +511,7 @@ with tab2:
         
         if not df_chacra_activa.empty:
             st.markdown("---")
-            lote_sel = st.selectbox("🎯 Bajar a Detalle Quirúrgico de Lote:", sorted(list(set(df_chacra_activa['id_lote_str'].tolist()))), key="sel_lote_m2_final")
+            lote_sel = st.selectbox("🎯 Bajar a Detalle de Lote:", sorted(list(set(df_chacra_activa['id_lote_str'].tolist()))), key="sel_lote_m2_final")
             lote_row = df_chacra_activa[df_chacra_activa['id_lote_str'] == str(lote_sel)].iloc[0]
             
             col_izq, col_der = st.columns([1, 1.2])
