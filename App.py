@@ -510,12 +510,39 @@ with tab2:
             col_izq, col_der = st.columns([1, 1.2])
 
             with col_izq:
-                st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
-                diagnostico, recomendacion = obtener_diagnostico_y_recomendacion(lote_row)
-                color_fondo = '#c62828' if "estrés" in diagnostico.lower() or "daño" in diagnostico.lower() else '#2e7d32'
-                st.markdown(f"""<div style='background:{color_fondo}; color:white; padding:15px; border-radius:5px;'>
-                            <b>Diagnóstico:</b> {diagnostico}<br><b>Recomendación:</b> {recomendacion}</div>""", unsafe_allow_html=True)
+    st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
+    
+    # 1. Definir funciones de estado para los semáforos individuales
+    # (Usamos las reglas de cambio que definiste: < -5, -5 a 5, > 5)
+    def color_semaforo(valor):
+        if valor < -5: return "#c62828"  # Rojo (Caída)
+        elif -5 <= valor <= 5: return "#2e7d32" # Verde (Estable)
+        else: return "#f39c12" # Amarillo (Posible mejora/cambio)
 
+    # 2. Renderizar los semáforos individuales
+    # Extracción de valores
+    c_ndre = float(lote_row.get('cambio_ndre', 0))
+    c_ndmi = float(lote_row.get('cambio_ndmi', 0))
+    d_sar = float(lote_row.get('desvio_sar', 0))
+
+    # Columnas internas para los tres indicadores
+    cols_ind = st.columns(3)
+    cols_ind[0].markdown(f"<div style='background:{color_semaforo(c_ndre)}; color:white; padding:5px; text-align:center; border-radius:5px;'>NDRE<br><b>{c_ndre:+.1f}%</b></div>", unsafe_allow_html=True)
+    cols_ind[1].markdown(f"<div style='background:{color_semaforo(c_ndmi)}; color:white; padding:5px; text-align:center; border-radius:5px;'>NDMI<br><b>{c_ndmi:+.1f}%</b></div>", unsafe_allow_html=True)
+    cols_ind[2].markdown(f"<div style='background:{'#c62828' if abs(d_sar)>2 else '#2e7d32'}; color:white; padding:5px; text-align:center; border-radius:5px;'>Radar<br><b>{'Cambio' if abs(d_sar)>2 else 'Estable'}</b></div>", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # 3. Renderizar el Diagnóstico y Recomendación (lo que ya configuramos)
+    diagnostico, recomendacion = obtener_diagnostico_y_recomendacion(lote_row)
+    color_diag = '#c62828' if "estrés" in diagnostico.lower() or "daño" in diagnostico.lower() else '#2e7d32'
+    
+    st.markdown(f"""
+        <div style='background:{color_diag}; color:white; padding:15px; border-radius:5px;'>
+        <b>Diagnóstico:</b> {diagnostico}<br><br>
+        <b>Recomendación:</b> {recomendacion}
+        </div>
+    """, unsafe_allow_html=True)
             with col_der:
                 st.markdown("### 🗺️ Visor de Capas")
                 capa_sel = st.radio("Capa:", ["Alertas", "NDRE", "NDMI", "Color Real (RGB)"], horizontal=True)
