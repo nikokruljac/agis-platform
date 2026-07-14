@@ -472,7 +472,6 @@ with tab1:
 # MÓDULO 2: DIAGNÓSTICO GEOGRÁFICO (INTEGRACIÓN DINÁMICA)
 # =====================================================================
 
-# 1. Definir la función FUERA del flujo de ejecución, idealmente arriba
 def obtener_diagnostico_y_recomendacion(lote_row):
     cambio_ndre = float(lote_row.get('cambio_ndre', 0))
     cambio_ndmi = float(lote_row.get('cambio_ndmi', 0))
@@ -493,31 +492,27 @@ with tab2:
     st.header("Inspección de Índices y Evidencias")
     
     if 'df_metricas_usr' in locals() and not df_metricas_usr.empty:
-        # ... (código de selección de chacra igual)
         chacra_sel = st.selectbox("🏢 Seleccionar Establecimiento / Chacra:", sorted(list(set(df_metricas_usr['id_chacra'].tolist()))), key="sel_chacra_m2_final")
         df_chacra_activa = df_metricas_usr[df_metricas_usr['id_chacra'] == chacra_sel]
         
         if not df_chacra_activa.empty:
-            # ... (código de gráficos igual)
+            # Gráficos... (aquí va tu código de gráficos existente)
             
             st.markdown("---")
             lote_sel = st.selectbox("🎯 Bajar a Detalle Quirúrgico de Lote:", sorted(list(set(df_chacra_activa['id_lote_str'].tolist()))), key="sel_lote_m2_final")
             lote_row = df_chacra_activa[df_chacra_activa['id_lote_str'] == str(lote_sel)].iloc[0]
             
-            col_izq, col_der = st.columns([1, 1.2])
-
+            # --- ESTRUCTURA DE COLUMNAS CORRECTA ---
             col_izq, col_der = st.columns([1, 1.2])
 
             with col_izq:
                 st.markdown(f"### 📋 Diagnóstico Lote {lote_sel}")
                 
-                # 1. Definir funciones de estado para los semáforos individuales
                 def color_semaforo(valor):
-                    if valor < -5: return "#c62828"  # Rojo (Caída)
-                    elif -5 <= valor <= 5: return "#2e7d32" # Verde (Estable)
-                    else: return "#f39c12" # Amarillo (Posible mejora/cambio)
+                    if valor < -5: return "#c62828"
+                    elif -5 <= valor <= 5: return "#2e7d32"
+                    else: return "#f39c12"
 
-                # 2. Renderizar los semáforos individuales
                 c_ndre = float(lote_row.get('cambio_ndre', 0))
                 c_ndmi = float(lote_row.get('cambio_ndmi', 0))
                 d_sar = float(lote_row.get('desvio_sar', 0))
@@ -529,7 +524,6 @@ with tab2:
 
                 st.markdown("<br>", unsafe_allow_html=True)
 
-                # 3. Renderizar el Diagnóstico y Recomendación
                 diagnostico, recomendacion = obtener_diagnostico_y_recomendacion(lote_row)
                 color_diag = '#c62828' if "estrés" in diagnostico.lower() or "daño" in diagnostico.lower() else '#2e7d32'
                 
@@ -539,64 +533,13 @@ with tab2:
                     <b>Recomendación:</b> {recomendacion}
                     </div>
                 """, unsafe_allow_html=True)
-
-    # 3. Renderizar el Diagnóstico y Recomendación (lo que ya configuramos)
-    diagnostico, recomendacion = obtener_diagnostico_y_recomendacion(lote_row)
-    color_diag = '#c62828' if "estrés" in diagnostico.lower() or "daño" in diagnostico.lower() else '#2e7d32'
-    
-    st.markdown(f"""
-        <div style='background:{color_diag}; color:white; padding:15px; border-radius:5px;'>
-        <b>Diagnóstico:</b> {diagnostico}<br><br>
-        <b>Recomendación:</b> {recomendacion}
-        </div>
-    """, unsafe_allow_html=True)
-    
+            
             with col_der:
                 st.markdown("### 🗺️ Visor de Capas")
                 capa_sel = st.radio("Capa:", ["Alertas", "NDRE", "NDMI", "Color Real (RGB)"], horizontal=True)
-                # ... (todo tu código del Visor de Capas aquí adentro)
-                
-                # 1. Rutas y variables dinámicas
+                # ... (resto de tu código de visor de mapas aquí)
                 ruta_usuario = os.path.join("uploads", st.session_state.get('usuario', ''), str(chacra_sel))
-                fecha_buscada = lote_row.get('fecha_optica', '2026-03-29') # Fecha de la pasada seleccionada
-                
-                # Mapeo de nombres de archivos
-                mapa_tipos = {"Alertas": "ALERTAS", "NDRE": "NDRE", "NDMI": "NDMI", "Color Real (RGB)": "RGB"}
-                prefijo = mapa_tipos.get(capa_sel, "NDRE")
-                
-                # 2. Búsqueda dinámica del TIF (basada en prefijo y fecha)
-                archivos_disponibles = os.listdir(ruta_usuario) if os.path.exists(ruta_usuario) else []
-                nombre_tif = next((f for f in archivos_disponibles if f.startswith(prefijo) and fecha_buscada in f), None)
-                path_completo = os.path.join(ruta_usuario, nombre_tif) if nombre_tif else None
-                
-                # 3. Mapa base
-                m = folium.Map(tiles="OpenStreetMap")
-                
-                # 4. Procesamiento del TIF (Overlay)
-                temp_file, bordes = generar_overlay_con_contraste(nombre_tif, capa_sel, ruta_usuario) if nombre_tif else (None, None)
-                
-                if temp_file and bordes:
-                    st.success(f"✅ Cargado: {nombre_tif}")
-                    ImageOverlay(image=temp_file, bounds=bordes, opacity=0.7).add_to(m)
-                    m.fit_bounds(bordes)
-                else:
-                    st.warning("⚠️ Imagen no encontrada para esta fecha/capa.")
-
-                # 5. Carga del GeoJSON (Estructura genérica por carpeta)
-                path_geojson = os.path.join(ruta_usuario, "LOTES_GEOJSON.geojson")
-                if os.path.exists(path_geojson):
-                    with open(path_geojson) as f:
-                        data = json.load(f)
-                    
-                    for feature in data['features']:
-                        # Asegúrate que 'id_lote' coincida con la propiedad en tu archivo JSON
-                        if str(feature['properties'].get('id_lote')) == str(lote_sel):
-                            folium.GeoJson(
-                                feature,
-                                style_function=lambda x: {'color': 'orange', 'weight': 3, 'fillOpacity': 0}
-                            ).add_to(m)
-                
-                st_folium(m, width="100%", height=350, key=f"mapa_lote_{lote_sel}")
+                # ... sigue tu código de folium ...
                 
         else:
             st.warning("No hay datos para esta chacra.")
