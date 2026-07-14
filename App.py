@@ -530,17 +530,14 @@ with tab2:
                 st.markdown("### 🗺️ Visor de Capas")
                 capa_sel = st.radio("Capa:", ["Alertas", "NDRE", "NDMI", "Color Real (RGB)"], horizontal=True)
                 
-                # --- DEBUG DE RUTA ---
+                # Definición de ruta
                 ruta_usuario = os.path.join("uploads", st.session_state.get('usuario', ''), str(chacra_sel))
                 nombre_tif = f"Lote_{lote_sel}.tif"
-                path_completo = os.path.join(ruta_usuario, nombre_tif)
                 
-                st.caption(f"Buscando en: {path_completo}") # ¡Esto te dirá si la ruta es correcta!
-                
-                # Generamos el overlay
+                # Procesamiento
                 temp_file, bordes = generar_overlay_con_contraste(nombre_tif, capa_sel, ruta_usuario)
                 
-                # Mapa
+                # Mapa único
                 m = folium.Map(tiles="OpenStreetMap")
                 
                 if temp_file and bordes:
@@ -548,9 +545,11 @@ with tab2:
                     ImageOverlay(image=temp_file, bounds=bordes, opacity=0.7).add_to(m)
                     m.fit_bounds(bordes)
                 else:
-                    st.warning("⚠️ No se pudo procesar el archivo. Verifica que exista y tenga georreferenciación.")
+                    st.warning("⚠️ No se pudo cargar el archivo. Verifica la ruta y la georreferenciación.")
+                    # Centramos en un punto genérico si no carga el TIF para que no se vea el mapa mundial
+                    m.fit_bounds([[-39.0, -67.0], [-39.1, -66.9]]) 
                 
-                st_folium(m, width="100%", height=350)
+                st_folium(m, width="100%", height=350, key=f"mapa_lote_{lote_sel}")
                 
                 # --- INTEGRACIÓN DINÁMICA ---
                 ruta_usuario = os.path.join("uploads", st.session_state['usuario'], chacra_sel)
