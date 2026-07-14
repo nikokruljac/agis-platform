@@ -530,24 +530,45 @@ with tab2:
                 st.markdown("### 🗺️ Visor de Capas")
                 capa_sel = st.radio("Capa:", ["Alertas", "NDRE", "NDMI", "Color Real (RGB)"], horizontal=True)
                 
-                # Definición de ruta
+                # 1. Rutas y variables dinámicas
                 ruta_usuario = os.path.join("uploads", st.session_state.get('usuario', ''), str(chacra_sel))
-                nombre_tif = f"Lote_{lote_sel}.tif"
+                fecha_buscada = lote_row.get('fecha_optica', '2026-03-29') # Fecha de la pasada seleccionada
                 
-                # Procesamiento
-                temp_file, bordes = generar_overlay_con_contraste(nombre_tif, capa_sel, ruta_usuario)
+                # Mapeo de nombres de archivos
+                mapa_tipos = {"Alertas": "ALERTAS", "NDRE": "NDRE", "NDMI": "NDMI", "Color Real (RGB)": "RGB"}
+                prefijo = mapa_tipos.get(capa_sel, "NDRE")
                 
-                # Mapa único
+                # 2. Búsqueda dinámica del TIF (basada en prefijo y fecha)
+                archivos_disponibles = os.listdir(ruta_usuario) if os.path.exists(ruta_usuario) else []
+                nombre_tif = next((f for f in archivos_disponibles if f.startswith(prefijo) and fecha_buscada in f), None)
+                path_completo = os.path.join(ruta_usuario, nombre_tif) if nombre_tif else None
+                
+                # 3. Mapa base
                 m = folium.Map(tiles="OpenStreetMap")
                 
+                # 4. Procesamiento del TIF (Overlay)
+                temp_file, bordes = generar_overlay_con_contraste(nombre_tif, capa_sel, ruta_usuario) if nombre_tif else (None, None)
+                
                 if temp_file and bordes:
-                    st.success("✅ Archivo cargado correctamente")
+                    st.success(f"✅ Cargado: {nombre_tif}")
                     ImageOverlay(image=temp_file, bounds=bordes, opacity=0.7).add_to(m)
                     m.fit_bounds(bordes)
                 else:
-                    st.warning("⚠️ No se pudo cargar el archivo. Verifica la ruta y la georreferenciación.")
-                    # Centramos en un punto genérico si no carga el TIF para que no se vea el mapa mundial
-                    m.fit_bounds([[-39.0, -67.0], [-39.1, -66.9]]) 
+                    st.warning("⚠️ Imagen no encontrada para esta fecha/capa.")
+
+                # 5. Carga del GeoJSON (Estructura genérica por carpeta)
+                path_geojson = os.path.join(ruta_usuario, "LOTES_GEOJSON.geojson")
+                if os.path.exists(path_geojson):
+                    with open(path_geojson) as f:
+                        data = json.load(f)
+                    
+                    for feature in data['features']:
+                        # Asegúrate que 'id_lote' coincida con la propiedad en tu archivo JSON
+                        if str(feature['properties'].get('id_lote')) == str(lote_sel):
+                            folium.GeoJson(
+                                feature,
+                                style_function=lambda x: {'color': 'orange', 'weight': 3, 'fillOpacity': 0}
+                            ).add_to(m)
                 
                 st_folium(m, width="100%", height=350, key=f"mapa_lote_{lote_sel}")
                 
