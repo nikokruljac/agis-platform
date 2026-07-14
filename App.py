@@ -551,19 +551,6 @@ with tab2:
                 
                 st_folium(m, width="100%", height=350, key=f"mapa_lote_{lote_sel}")
                 
-                # --- INTEGRACIÓN DINÁMICA ---
-                ruta_usuario = os.path.join("uploads", st.session_state['usuario'], chacra_sel)
-                # Buscamos el TIF asociado al lote o chacra (ajusta el nombre del archivo según tus archivos reales)
-                nombre_tif = f"Lote_{lote_sel}.tif" 
-                
-                temp_file, bordes = generar_overlay_con_contraste(nombre_tif, capa_sel, ruta_usuario)
-                
-                m = folium.Map(tiles="OpenStreetMap")
-                if temp_file and bordes:
-                    ImageOverlay(image=temp_file, bounds=bordes, opacity=0.7).add_to(m)
-                    m.fit_bounds(bordes)
-                
-                st_folium(m, width="100%", height=350, key=f"mapa_lote_{lote_sel}")
         else:
             st.warning("No hay datos para esta chacra.")
     else:
