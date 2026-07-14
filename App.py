@@ -550,6 +550,7 @@ with tab2:
         <b>Recomendación:</b> {recomendacion}
         </div>
     """, unsafe_allow_html=True)
+    
             with col_der:
                 st.markdown("### 🗺️ Visor de Capas")
                 capa_sel = st.radio("Capa:", ["Alertas", "NDRE", "NDMI", "Color Real (RGB)"], horizontal=True)
