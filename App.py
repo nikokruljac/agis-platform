@@ -144,8 +144,15 @@ st.markdown(
 # 2. MOTOR DE CARGA DINÁMICA (ACTUALIZADO: CONSOLIDA TODOS LOS ARCHIVOS)
 def obtener_datos_usuario(username):
     ruta_usuario = os.path.join("uploads", username)
-    # Busca archivos CSV en todas las subcarpetas de chacras
+    
+    # --- LÍNEA DE DIAGNÓSTICO ---
+    st.write(f"🔍 Buscando en: {os.path.abspath(ruta_usuario)}")
+    st.write(f"¿Existe la carpeta?: {os.path.exists(ruta_usuario)}")
+    # ----------------------------
+
     csv_files = glob.glob(os.path.join(ruta_usuario, "**/*.csv"), recursive=True)
+    st.write(f"📂 Archivos encontrados: {csv_files}") # --- TAMBIÉN ESTA ---
+    
     
     lista_dfs = []
     for archivo in csv_files:
