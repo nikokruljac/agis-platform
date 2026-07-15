@@ -141,25 +141,45 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-# 2. MOTOR DE CARGA DINÁMICA (Lee lo que subes desde AGIS Studio)
+# 2. MOTOR DE CARGA DINÁMICA (ACTUALIZADO: CONSOLIDA TODOS LOS ARCHIVOS)
 def obtener_datos_usuario(username):
     ruta_usuario = os.path.join("uploads", username)
+    # Busca archivos CSV en todas las subcarpetas de chacras
     csv_files = glob.glob(os.path.join(ruta_usuario, "**/*.csv"), recursive=True)
-    if csv_files:
-        df = pd.read_csv(csv_files[0])
-        df.columns = df.columns.str.strip()
-        # Relleno de seguridad
+    
+    lista_dfs = []
+    for archivo in csv_files:
+        try:
+            df_temp = pd.read_csv(archivo)
+            df_temp.columns = df_temp.columns.str.strip()
+            
+            # Si el CSV no trae la columna chacra, tomamos el nombre de la subcarpeta como ID
+            if 'id_chacra' not in df_temp.columns:
+                df_temp['id_chacra'] = os.path.basename(os.path.dirname(archivo))
+            
+            lista_dfs.append(df_temp)
+        except Exception:
+            continue
+            
+    if lista_dfs:
+        df = pd.concat(lista_dfs, ignore_index=True)
+        # Relleno de seguridad y limpieza
         df = df.fillna({'porcentaje_alerta': 0.0, 'ndre_actual': 0.0, 'ndmi_actual': 0.0, 'alerta_radar': 'ESTABLE', 'cultivo': 'N/A'})
         df['id_lote_str'] = df['id_lote'].astype(str).str.strip().str.replace('.0', '', regex=False).str.zfill(2) if 'id_lote' in df.columns else "01"
-        df['id_chacra'] = df['id_chacra'].astype(str).str.strip() if 'id_chacra' in df.columns else "Chacra"
+        df['id_chacra'] = df['id_chacra'].astype(str).str.strip()
         return df
     return pd.DataFrame()
 
-# Cargamos el DF del usuario logueado
+# Cargamos el DF del usuario logueado con cache para mejorar estabilidad
+@st.cache_data(ttl=300) # Se refresca cada 5 minutos
+def cargar_datos_cache(usuario):
+    return obtener_datos_usuario(usuario)
+
 if st.session_state.get('logueado'):
-    df_metricas = obtener_datos_usuario(st.session_state['usuario'])
+    df_metricas = cargar_datos_cache(st.session_state['usuario'])
 else:
     df_metricas = pd.DataFrame()
+
 def obtener_ruta_logo():
     return "logo.png" if os.path.exists("logo.png") else ( "logo_agis.png" if os.path.exists("logo_agis.png") else None )
 
